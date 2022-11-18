@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.Abstract
-{ 
-    //Veri tabanı verileridir 
-    public interface IEntity
+namespace Core.DataAcces.EnitityFramework
+{
+    public class EfEntityRepositoryBase<TEntity,TContext>
     {
     }
 }
