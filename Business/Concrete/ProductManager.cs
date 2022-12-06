@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.CCS;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
@@ -24,21 +25,25 @@ namespace Business.Concrete
         public ProductManager(IProductDal productDal)
         {
             _productDal = productDal;
+
         }
         [ValidationAspect(typeof(ProductValidator))]
+
         public IResult Add(Product product)
         {
-
-           
-            _productDal.Add(product);
-
-            return new SuccessResult(Messages.ProductAdded);
+            if (CheckIfProductCountOfCategoryCorrect(product.CategoryId).Succes)
+            {
+                _productDal.Add(product);
+                return new SuccessResult(Messages.ProductAdded);
+            }
+            return new ErrorResult();
+             
         }
 
         public IDataResult<List<Product>> GetAll()
         {
-            
-            return new SuccesDataResult<List<Product>>(_productDal.GetAll(),Messages.ProductsListed);
+
+            return new SuccesDataResult<List<Product>>(_productDal.GetAll(), Messages.ProductsListed);
         }
 
         public IDataResult<List<Product>> GetAllByCategoryId(int id)
@@ -48,7 +53,7 @@ namespace Business.Concrete
 
         public IDataResult<Product> GetById(int productId)
         {
-            return new SuccesDataResult<Product>(_productDal.Get(c => c.ProductId == productId)); 
+            return new SuccesDataResult<Product>(_productDal.Get(c => c.ProductId == productId));
         }
 
         public IDataResult<List<Product>> GetByUnitPrice(decimal min, decimal max)
@@ -59,6 +64,20 @@ namespace Business.Concrete
         public IDataResult<List<ProductDetailDto>> GetProductDetails()
         {
             return new SuccesDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
+        }
+
+        public IResult Update(Product product)
+        {
+            throw new NotImplementedException();
+        }
+        private IResult CheckIfProductCountOfCategoryCorrect(int categoryId)
+        {
+            var result = _productDal.GetAll(p => p.CategoryId == categoryId).Count;
+            if (result >= 10)
+            {
+                return new ErrorResult(Messages.ProductCountOfCategoryError);
+            }
+            return new SuccessResult();
         }
     }
 }
